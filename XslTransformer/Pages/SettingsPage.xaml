@@ -1,0 +1,117 @@
+﻿<Page x:Class="XslTransformer.SettingsPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:XslTransformer"
+      xmlns:core="clr-namespace:XslTransformer.Core;assembly=XslTransformer.Core"
+      xmlns:string="clr-namespace:XslTransformer.Core.Strings;assembly=XslTransformer.Core"
+      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+      xmlns:UserControls="clr-namespace:XslTransformer.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="640" d:DesignWidth="400"
+      Title="SettingsPage"
+      Style="{DynamicResource MetroPage}">
+
+    <Border Padding="17 20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Grid.Row="1">
+                <TextBlock Text="{x:Static string:Resources.XslTransformerSettings}" FontSize="24"
+                           Margin="0 0 0 10"/>
+                <TextBlock Text="{x:Static string:Resources.XmlParser}"
+                           FontSize="17"
+                           Margin="0 0 0 10"/>
+                <TextBlock Text="{x:Static string:Resources.Validation}"
+                           FontWeight="Bold" Foreground="{StaticResource GrayBrush1}"
+                           Margin="0 0 0 8"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{x:Static string:Resources.DtdProcessing}"
+                               VerticalAlignment="Center"
+                               Margin="0 0 8 0"/>
+                    <ComboBox ItemsSource="{Binding DtdProcessingValues}"
+                              SelectedItem="{Binding DtdProcessing}"
+                              Grid.Column="1"/>
+                    <TextBlock Text="{x:Static string:Resources.ValidationType}"
+                               VerticalAlignment="Center"
+                               Margin="0 5 8 0"
+                               Grid.Row="1"/>
+                    <ComboBox ItemsSource="{Binding ValidationTypeValues}"
+                              SelectedItem="{Binding ValidationType}"
+                              Margin="0 5 0 0"
+                              Grid.Column="1"
+                              Grid.Row="1"/>
+                </Grid>
+                <CheckBox Content="{x:Static string:Resources.CheckCharacters}"
+                          IsChecked="{Binding CheckCharacters, Mode=TwoWay}"
+                          Margin="0 8 0 0" />
+                <TextBlock Text="{x:Static string:Resources.SchemaValidation}"
+                           FontWeight="Bold" Foreground="{StaticResource GrayBrush1}"
+                           Margin="0 16 0 0" />
+                <CheckBox Content="{x:Static string:Resources.AllowXmlAttributes}"
+                          IsChecked="{Binding XsdValidationFlag_AllowXmlAttributes, Mode=TwoWay}"
+                          Margin="0 10 0 0" />
+                <CheckBox Content="{x:Static string:Resources.ProcessIdentityConstraints}"
+                          IsChecked="{Binding XsdValidationFlag_ProcessIdentityConstraints, Mode=TwoWay}"
+                          Margin="0 8 0 0" />
+                <CheckBox IsChecked="{Binding XsdValidationFlag_ProcessSchemaLocation, Mode=TwoWay}"
+                          Margin="0 -8 0 0">
+                    <TextBlock Margin="0 16 0 0" Text="{x:Static string:Resources.ProcessSchemaLocation}" />
+                </CheckBox>
+                <CheckBox Content="{x:Static string:Resources.ProcessInlineSchema}"
+                          IsChecked="{Binding XsdValidationFlag_ProcessInlineSchema, Mode=TwoWay}"
+                          Margin="0 8 0 0" />
+                <CheckBox Content="{x:Static string:Resources.ReportValidationWarnings}"
+                          IsChecked="{Binding XsdValidationFlag_ReportValidationWarnings, Mode=TwoWay}"
+                          Margin="0 8 0 0" />
+                <TextBlock Text="XSLT-Stylesheet" FontSize="17"
+                           Margin="0 16 0 0"/>
+                <CheckBox Content="{x:Static string:Resources.EnableDocumentFunction}"
+                          IsChecked="{Binding EnableDocumentFunction, Mode=TwoWay}"
+                          Margin="0 10 0 0" />
+                <CheckBox Content="{x:Static string:Resources.EnableScript}"
+                          IsChecked="{Binding EnableScript, Mode=TwoWay}"
+                          Margin="0 8 0 0" />
+                <TextBlock Text="Ausgabe" FontSize="17"
+                           Margin="0 16 0 0"/>
+                <CheckBox Content="{x:Static string:Resources.WriteUtf8Bom}"
+                          IsChecked="{Binding WriteUtf8Bom, Mode=TwoWay}"
+                          Margin="0 10 0 0" />
+                <Grid Margin="0 17 0 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Button Content="{x:Static string:Resources.Save}"
+                        Command="{Binding SettingsOkayCommand}"
+                        Style="{DynamicResource AccentedSquareButtonStyle}"
+                        Margin="0 0 3 0"
+                        Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+                    <Button Content="{x:Static string:Resources.Cancel}"
+                        Command="{Binding SettingsCancelCommand}"
+                        Style="{DynamicResource SquareButtonStyle}"
+                        Grid.Column="1"
+                        Margin="3 0 0 0"
+                        Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+                </Grid>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Page>

@@ -1,0 +1,137 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:XslTransformer"
+                    xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                    xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro">
+
+    <!-- Dialog message icon colors -->
+    <Color x:Key="InfoColor">#FF00529B</Color>
+    <Color x:Key="SuccessColor">#FF4F8A10</Color>
+    <Color x:Key="WarningColor">#FF9F6000</Color>
+    <Color x:Key="ErrorColor">#FFD8000C</Color>
+
+    <!-- Dialog message icon color brushes -->
+    <SolidColorBrush x:Key="InfoColorBrush" Color="{StaticResource InfoColor}" />
+    <SolidColorBrush x:Key="SuccessColorBrush" Color="{StaticResource SuccessColor}" />
+    <SolidColorBrush x:Key="WarningColorBrush" Color="{StaticResource WarningColor}" />
+    <SolidColorBrush x:Key="ErrorColorBrush" Color="{StaticResource ErrorColor}" />
+
+    <!-- Dialog message icon symbols -->
+    <VisualBrush x:Key="InfoSymbol" Visual="{StaticResource appbar_information_circle}" />
+    <VisualBrush x:Key="SuccessSymbol" Visual="{StaticResource appbar_check}" />
+    <VisualBrush x:Key="WarningSymbol" Visual="{StaticResource appbar_warning}" />
+    <VisualBrush x:Key="ErrorSymbol" Visual="{StaticResource appbar_stop}" />
+    
+    <!-- Dialog message icon styles -->
+    <Style TargetType="{x:Type Rectangle}"
+           x:Key="NoMessageIcon">
+        <Setter Property="Visibility" Value="Collapsed" />
+    </Style>
+    
+    <Style TargetType="{x:Type Rectangle}"
+           x:Key="InfoMessageIcon">
+        <Setter Property="Visibility" Value="Visible" />
+        <Setter Property="Fill" Value="{StaticResource InfoColorBrush}" />
+        <Setter Property="OpacityMask" Value="{StaticResource InfoSymbol}" />
+    </Style>
+    
+    <Style TargetType="{x:Type Rectangle}"
+           x:Key="SuccessMessageIcon">
+        <Setter Property="Visibility" Value="Visible" />
+        <Setter Property="Fill" Value="{StaticResource SuccessColorBrush}" />
+        <Setter Property="OpacityMask" Value="{StaticResource SuccessSymbol}" />
+    </Style>
+    
+    <Style TargetType="{x:Type Rectangle}"
+           x:Key="WarningMessageIcon">
+        <Setter Property="Visibility" Value="Visible" />
+        <Setter Property="Fill" Value="{StaticResource WarningColorBrush}" />
+        <Setter Property="OpacityMask" Value="{StaticResource WarningSymbol}" />
+    </Style>
+
+    <Style TargetType="{x:Type Rectangle}"
+           x:Key="ErrorMessageIcon">
+        <Setter Property="Visibility" Value="Visible" />
+        <Setter Property="Fill" Value="{StaticResource ErrorColorBrush}" />
+        <Setter Property="OpacityMask" Value="{StaticResource ErrorSymbol}" />
+    </Style>
+
+    <!-- Custom message dialog style -->
+    <Style TargetType="{x:Type Dialog:BaseMetroDialog}"
+           x:Key="CustomizedDialog"
+           BasedOn="{StaticResource {x:Type Dialog:BaseMetroDialog}}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type Dialog:BaseMetroDialog}">
+                    <ControlTemplate.Resources>
+                        <Storyboard x:Key="DialogShownStoryboard">
+                            <DoubleAnimation AccelerationRatio=".9"
+                                            BeginTime="0:0:0"
+                                            Duration="0:0:0.2"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" />
+                        </Storyboard>
+                    </ControlTemplate.Resources>
+                    <Grid Background="{TemplateBinding Background}">
+                        <Border FocusVisualStyle="{x:Null}" Focusable="False">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <ContentPresenter Grid.Row="0" Content="{TemplateBinding DialogTop}" />
+                                <Grid Grid.Row="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20*" />
+                                        <ColumnDefinition Width="60*" />
+                                        <ColumnDefinition Width="20*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Custom Icon -->
+                                    <Border Grid.Column="0" Padding="16">
+                                        <Rectangle Width="48"
+                                                   Height="48"
+                                                   VerticalAlignment="Top"
+                                                   HorizontalAlignment="Right"
+                                                   Style="{DynamicResource CustomMessageIconStyle}"/>
+                                    </Border>
+
+                                    <!--  Content area  -->
+                                    <Grid Grid.Column="1" Margin="0 10 0 0">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock x:Name="PART_Title"
+                                                   Grid.Row="0"
+                                                   FontSize="{TemplateBinding DialogTitleFontSize}"
+                                                   Foreground="{TemplateBinding Foreground}"
+                                                   Text="{TemplateBinding Title}"
+                                                   TextWrapping="Wrap" />
+                                        <ContentPresenter Grid.Row="1" Content="{TemplateBinding Content}" />
+                                    </Grid>
+                                </Grid>
+                                <ContentPresenter Grid.Row="2" Content="{TemplateBinding DialogBottom}" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="Title" Value="{x:Null}">
+                            <Setter TargetName="PART_Title" Property="Visibility" Value="Collapsed" />
+                        </Trigger>
+                        <EventTrigger RoutedEvent="Loaded">
+                            <EventTrigger.Actions>
+                                <BeginStoryboard Storyboard="{StaticResource DialogShownStoryboard}" />
+                            </EventTrigger.Actions>
+                        </EventTrigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="{x:Type Dialog:MessageDialog}" BasedOn="{StaticResource CustomizedDialog}" />
+
+    <Style TargetType="{x:Type Dialog:CustomDialog}" BasedOn="{StaticResource CustomizedDialog}" />
+</ResourceDictionary>

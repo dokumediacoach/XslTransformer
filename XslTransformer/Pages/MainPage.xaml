@@ -1,0 +1,169 @@
+﻿<Page x:Class="XslTransformer.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:XslTransformer"
+      xmlns:core="clr-namespace:XslTransformer.Core;assembly=XslTransformer.Core"
+      xmlns:string="clr-namespace:XslTransformer.Core.Strings;assembly=XslTransformer.Core"
+      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+      xmlns:UserControls="clr-namespace:XslTransformer.UserControls"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="400"
+      Title="MainPage"
+      Style="{DynamicResource MetroPage}">
+
+    <Page.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary>
+                    <Style x:Key="ParameterNameCell" TargetType="{x:Type TextBlock}" BasedOn="{StaticResource MetroTextBlock}">
+                        <Style.Triggers>
+                            <Trigger Property="Validation.HasError" Value="true">
+                                <Setter Property="ToolTip"
+                                        Value="{Binding RelativeSource={RelativeSource Self},
+                                                Path=(Validation.Errors)[0].ErrorContent}"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ResourceDictionary>
+                <ResourceDictionary Source="/Resources/CustomizedBusyButtons.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Page.Resources>
+
+    <Border Padding="17 20">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- XML input file -->
+            <StackPanel Grid.Row="0">
+                <TextBlock Text="{x:Static string:Resources.XmlInputFile}"
+                           FontWeight="Bold" Margin="0 0 0 10"/>
+                <UserControls:XmlInputFilePicker DialogTitle="{x:Static string:Resources.ChooseXmlInputFileDialogTitle}"
+                                                 XmlInputText="{Binding XmlInputPath}"
+                                                 XmlInputFile="{Binding XmlInputFile, Mode=OneWayToSource}" />
+
+                <TextBlock Text="{x:Static string:Resources.XslTransformations}"
+                           FontWeight="Bold" Margin="0 15 0 10"/>
+            </StackPanel>
+
+            <!-- XSLT-Stylesheets -->
+            <ListBox Grid.Row="1"
+                     BorderThickness="1"
+                     BorderBrush="{DynamicResource TextBoxBorderBrush}"
+                     Margin="0 0 0 5"
+                     ItemsSource="{Binding Stylesheets}"
+                     DisplayMemberPath="Path"
+                     SelectedItem="{Binding SelectedStylesheet}">
+            </ListBox>
+
+            <StackPanel Grid.Row="2">
+                <StackPanel Orientation="Horizontal">
+                    <UserControls:XslInputFilesPicker XslInputLabel="{x:Static string:Resources.AddXslt}"
+                                                      DialogTitle="{x:Static string:Resources.AddXsltDialogTitle}"
+                                                      XslInputFileList="{Binding XslInputFileList, Mode=OneWayToSource}" />
+                    <Button Content="{x:Static string:Resources.RemoveXslt}"
+                            IsEnabled="{Binding IsStylesheetSelected}"
+                            Command="{Binding RemoveStylesheetCommand}"
+                            Padding="5 4 5 6" Margin="0 0 6 0"
+                            Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+                    <Button IsEnabled="{Binding CanStylesheetMoveUp}"
+                            Command="{Binding MoveStylesheetUpCommand}"
+                            Padding="7" Margin="0 0 6 0">
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="12" Height="8"
+                                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill"
+                                                 Visual="{StaticResource appbar_chevron_up}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </StackPanel>
+                    </Button>
+                    <Button IsEnabled="{Binding CanStylesheetMoveDown}"
+                            Command="{Binding MoveStylesheetDownCommand}"
+                            Padding="7">
+                        <StackPanel Orientation="Horizontal">
+                            <Rectangle Width="12" Height="8"
+                                       Fill="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}">
+                                <Rectangle.OpacityMask>
+                                    <VisualBrush Stretch="Fill"
+                                                 Visual="{StaticResource appbar_chevron_down}" />
+                                </Rectangle.OpacityMask>
+                            </Rectangle>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                
+                <!-- Stylesheet-Parameters -->
+                <TextBlock Text="{x:Static string:Resources.XsltParameters}"
+                           FontWeight="Bold" Margin="0 15 0 10"/>
+            </StackPanel>
+            <DataGrid Grid.Row="3"
+                      DataContext="{Binding SelectedStylesheet}"
+                      ItemsSource="{Binding Parameters}"
+                      SelectedItem="{Binding DataContext.SelectedParameter, RelativeSource={RelativeSource AncestorType=Page}}"
+                      AutoGenerateColumns="False"
+                      CanUserAddRows="False"
+                      CanUserSortColumns="False"
+                      ColumnHeaderStyle="{StaticResource NormalColumnHeader}"
+                      ColumnWidth="*"
+                      BorderBrush="{DynamicResource TextBoxBorderBrush}"
+                      BorderThickness="1"
+                      Margin="0 0 0 5">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="{x:Static string:Resources.ParameterName}"
+                                        Binding="{Binding Name, NotifyOnValidationError=True, ValidatesOnDataErrors=True}"
+                                        ElementStyle="{StaticResource ParameterNameCell}" />
+                    <DataGridTextColumn Header="{x:Static string:Resources.ParameterValue}"
+                                        Binding="{Binding Value}" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Grid.Row="4">
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="{x:Static string:Resources.AddParameter}"
+                            IsEnabled="{Binding IsStylesheetSelected}"
+                            Command="{Binding AddParameterCommand}"
+                            Padding="5 4 5 6" Margin="0 0 6 0"
+                            Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+                    <Button Content="{x:Static string:Resources.RemoveParameter}"
+                            IsEnabled="{Binding IsParameterSelected}"
+                            Command="{Binding RemoveParameterCommand}"
+                            Padding="5 4 5 6" Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+                </StackPanel>
+                <Button Content="{x:Static string:Resources.TransformXmlAndSaveResult}"
+                        Style="{StaticResource BusyButton}"
+                        local:IsBusyProperty.Value="{Binding TransformationIsRunning}"
+                        IsEnabled="{Binding IsTransformable}"
+                        Command="{Binding TransformCommand}"
+                        Padding="0 7 0 8" Margin="0 15 0 0"
+                        Controls:ControlsHelper.ContentCharacterCasing="Normal"/>
+            </StackPanel>
+
+            <!-- Message Dialogs encapsulated in UserControl -->
+            <UserControls:MessageDialog Show="{Binding ShowMessage}"
+                                        ShowAsync="{Binding ShowAsyncMessage}"
+                                        Title="{Binding MessageTitle}"
+                                        Text="{Binding MessageText}"
+                                        Icon="{Binding DisplayMessageIcon}"/>
+            
+            <!-- Save dialog encapsulated in UserControl -->
+            <UserControls:SaveDialog Title="{x:Static string:Resources.SaveResultFileDialogTitle}"
+                                     FilePathProposal="{Binding OutputFilePathProposal}"
+                                     SaveFilePath="{Binding OutputFilePath}" />
+
+            <!-- xml-stylesheet(s) dialog encapsulated in UserControl -->
+            <UserControls:XmlStylesheetDialogDisplay Show="{Binding ShowAsyncXmlStylesheetDialog}"
+                                                     XmlStylesheets="{Binding XmlStylesheetDeclarations}" />
+
+        </Grid>
+    </Border>
+</Page>
