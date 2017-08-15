@@ -557,7 +557,7 @@ namespace XslTransformer.Core
                 // Create XmlReaderSettings according to current XslTransformerSettings
                 XmlReaderSettings readerSettings = CreateXmlReaderSettings();
 
-                // Get XmlReader instance for XML input file
+                // Create input reader instance from XML input file
                 XmlReader inputReader = await XmlInput<XmlReader>(XmlInputPath, readerSettings);
                 // Return if there were errors
                 if (inputReader == null)
@@ -623,7 +623,7 @@ namespace XslTransformer.Core
                         // recreate input reader from input stream with settings
                         inputReader = XmlReader.Create(inputStream, readerSettings);
 
-                        // try to parse the xml in stream
+                        // try to parse the xml in stream to test it
                         try
                         {
                             while (await inputReader.ReadAsync()) ;
@@ -638,7 +638,10 @@ namespace XslTransformer.Core
                         }
 
                         // reset input stream position to read from the beginning
-                       //inputStream.Seek(0, SeekOrigin.Begin);
+                        inputStream.Seek(0, SeekOrigin.Begin);
+
+                        // recreate input reader to read from the beginning
+                        inputReader = XmlReader.Create(inputStream, readerSettings);
                     }
 
                     // Try to apply the transformation, put result to output stream
@@ -919,7 +922,11 @@ namespace XslTransformer.Core
             if (type.Equals(typeof(string)))
                 returnValue = inputPath;
             else
+            {
+                // Recreate the XmlReader object so it can be read from the beginning
+                reader = XmlReader.Create(inputPath, settings);
                 returnValue = reader;
+            }
             return (T)returnValue;
         }
 
