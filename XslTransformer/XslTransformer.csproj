@@ -26,7 +26,7 @@
     <UpdatePeriodically>true</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
-    <InstallUrl>https://raw.githubusercontent.com/dokumediacoach/XslTransformer/master/publish/</InstallUrl>
+    <InstallUrl>https://cdn.rawgit.com/dokumediacoach/XslTransformer/master/publish/</InstallUrl>
     <SupportUrl>http://xsl-transformer.dokumediacoach.de/</SupportUrl>
     <ProductName>XslTransformer</ProductName>
     <PublisherName>dokumediacoach</PublisherName>
@@ -34,8 +34,8 @@
     <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
     <WebPage>install-xsl-transformer.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>1</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>

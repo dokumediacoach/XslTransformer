@@ -8,7 +8,7 @@
         <expiration maximumAge="7" unit="days" />
       </update>
     </subscription>
-    <deploymentProvider codebase="https://raw.githubusercontent.com/dokumediacoach/XslTransformer/master/publish/XslTransformer.application" />
+    <deploymentProvider codebase="https://cdn.rawgit.com/dokumediacoach/XslTransformer/master/publish/XslTransformer.application" />
   </deployment>
   <compatibleFrameworks xmlns="urn:schemas-microsoft-com:clickonce.v2">
     <framework targetVersion="4.5.2" profile="Full" supportedRuntime="4.0.30319" />
@@ -21,7 +21,7 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha256" />
-        <dsig:DigestValue>8viGl6BxQpBYAwfSXnQ3JrBTbyO7npqfdwHjaeMvlfU=</dsig:DigestValue>
+        <dsig:DigestValue>lbZmd65brI7DFS6UULu4Y+rF1D5/8npTFM2CThfN32k=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
