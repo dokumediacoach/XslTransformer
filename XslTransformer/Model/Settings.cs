@@ -89,13 +89,13 @@ namespace XslTransformer
             mSettings.Add(Setting.EnableDocumentFunction, new SettingTypeValue()
             {
                 Type = typeof(bool),
-                Value = true
+                Value = false
             });
             mSettings.Remove(Setting.EnableScript);
             mSettings.Add(Setting.EnableScript, new SettingTypeValue()
             {
                 Type = typeof(bool),
-                Value = true
+                Value = false
             });
             mSettings.Remove(Setting.WriteUtf8Bom);
             mSettings.Add(Setting.WriteUtf8Bom, new SettingTypeValue()

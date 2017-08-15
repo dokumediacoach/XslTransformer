@@ -26,16 +26,15 @@
     <UpdatePeriodically>true</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>false</MapFileExtensions>
-    <InstallUrl>https://cdn.rawgit.com/dokumediacoach/XslTransformer/master/publish/</InstallUrl>
+    <InstallUrl>http://xsl-transformer.dokumediacoach.de/install/</InstallUrl>
     <SupportUrl>http://xsl-transformer.dokumediacoach.de/</SupportUrl>
     <ProductName>XslTransformer</ProductName>
     <PublisherName>dokumediacoach</PublisherName>
     <SuiteName>XslTransformer</SuiteName>
-    <CreateWebPageOnPublish>true</CreateWebPageOnPublish>
-    <WebPage>install-xsl-transformer.htm</WebPage>
+    <WebPage>index.html</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.0</ApplicationVersion>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -287,6 +286,16 @@
     <Resource Include="Resources\xsl-transformer-icon.ico" />
   </ItemGroup>
   <ItemGroup>
+    <PublishFile Include="PropertyChanged">
+      <Visible>False</Visible>
+      <Group>
+      </Group>
+      <TargetPath>
+      </TargetPath>
+      <PublishState>Exclude</PublishState>
+      <IncludeHash>True</IncludeHash>
+      <FileType>Assembly</FileType>
+    </PublishFile>
     <PublishFile Include="XslTransformer.exe.config">
       <Visible>False</Visible>
       <Group>
