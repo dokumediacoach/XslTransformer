@@ -1,0 +1,340 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AddedParameterNamePrefix" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="AddedParameterValuePrefix" xml:space="preserve">
+    <value>Value</value>
+  </data>
+  <data name="AddParameter" xml:space="preserve">
+    <value>Add Parameter</value>
+  </data>
+  <data name="AddXslt" xml:space="preserve">
+    <value>Add XSLT Stylesheet(s)</value>
+  </data>
+  <data name="AddXsltDialogTitle" xml:space="preserve">
+    <value>Choose XSLT File(s)</value>
+  </data>
+  <data name="ChooseXmlInputFileDialogTitle" xml:space="preserve">
+    <value>Choose XML Input File</value>
+  </data>
+  <data name="FileNotFoundMsgText" xml:space="preserve">
+    <value>File ‹{0}› could not be opened.</value>
+  </data>
+  <data name="FileNotFoundMsgTitle" xml:space="preserve">
+    <value>File not Found</value>
+  </data>
+  <data name="OutputFileErrorMsgText" xml:space="preserve">
+    <value>File: ‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="OutputFileErrorMsgTitle" xml:space="preserve">
+    <value>Error Writing Result File</value>
+  </data>
+  <data name="ParameterName" xml:space="preserve">
+    <value>Parameter Name</value>
+  </data>
+  <data name="ParameterType" xml:space="preserve">
+    <value>Parameter Type</value>
+  </data>
+  <data name="ParameterValue" xml:space="preserve">
+    <value>Parameter Vale</value>
+  </data>
+  <data name="RemoveParameter" xml:space="preserve">
+    <value>Remove Parameter</value>
+  </data>
+  <data name="RemoveXslt" xml:space="preserve">
+    <value>Remove XSLT stylesheet</value>
+  </data>
+  <data name="SaveResultFileDialogTitle" xml:space="preserve">
+    <value>Save Result File</value>
+  </data>
+  <data name="TransformationResultErrorMsgText" xml:space="preserve">
+    <value>Last processed XSLT stylesheet:
+‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="TransformationResultErrorMsgTitle" xml:space="preserve">
+    <value>Error While Further Processing a Transformation Result</value>
+  </data>
+  <data name="TransformationSuccessMsgText" xml:space="preserve">
+    <value>The transformation was successfully completed.</value>
+  </data>
+  <data name="TransformationSuccessMsgTitle" xml:space="preserve">
+    <value>Transformation Completed</value>
+  </data>
+  <data name="TransformXmlAndSaveResult" xml:space="preserve">
+    <value>Transform XML and Save Result</value>
+  </data>
+  <data name="XmlInputFile" xml:space="preserve">
+    <value>XML Input File</value>
+  </data>
+  <data name="XmlInputFileErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="XmlInputFileErrorMsgTitle" xml:space="preserve">
+    <value>Error Loading XML Input File</value>
+  </data>
+  <data name="XmlInputFileValidationErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="XmlInputFileValidationErrorMsgTitle" xml:space="preserve">
+    <value>Validation Error while Loading XML Input File</value>
+  </data>
+  <data name="XmlValidationErrorMsgTitle" xml:space="preserve">
+    <value>Validation Error</value>
+  </data>
+  <data name="XmlValidationMsgText" xml:space="preserve">
+    <value>Description:
+{0}</value>
+  </data>
+  <data name="XmlValidationWarningMsgTitle" xml:space="preserve">
+    <value>Validation Warning</value>
+  </data>
+  <data name="XsltErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="XsltErrorMsgTitle" xml:space="preserve">
+    <value>Error Loading XSLT File</value>
+  </data>
+  <data name="XsltParameters" xml:space="preserve">
+    <value>Transformation Parameters</value>
+  </data>
+  <data name="XslTransformationErrorMsgText" xml:space="preserve">
+    <value>Processed XSLT stylesheet:
+‹{0}›
+
+Description:
+{1}</value>
+  </data>
+  <data name="XslTransformationErrorMsgTitle" xml:space="preserve">
+    <value>Error During XSL Transformation</value>
+  </data>
+  <data name="XslTransformations" xml:space="preserve">
+    <value>XSL Transformation(s)</value>
+  </data>
+  <data name="XsltXmlErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}› is not well-formed:
+
+Description:
+{1}</value>
+  </data>
+  <data name="XsltXsltErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}› contains Errors:
+
+Description:
+{1}</value>
+  </data>
+  <data name="AllowXmlAttributes" xml:space="preserve">
+    <value>Allow XML attributes (xml:*) without Schema definition</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="CheckCharacters" xml:space="preserve">
+    <value>Check characters and names</value>
+  </data>
+  <data name="DtdProcessing" xml:space="preserve">
+    <value>DTD Processing</value>
+  </data>
+  <data name="EnableDocumentFunction" xml:space="preserve">
+    <value>Enable XSLT document() function</value>
+  </data>
+  <data name="EnableScript" xml:space="preserve">
+    <value>Enable embedded scripts</value>
+  </data>
+  <data name="ProcessIdentityConstraints" xml:space="preserve">
+    <value>Check xs:ID, xs:IDREF, xs:key, xs:keyref, xs:unique</value>
+  </data>
+  <data name="ProcessInlineSchema" xml:space="preserve">
+    <value>Process inline schemas</value>
+  </data>
+  <data name="ProcessSchemaLocation" xml:space="preserve">
+    <value>Process schema location hints (xsi:schemaLocation,
+xsi:noNamespaceSchemaLocation)</value>
+  </data>
+  <data name="ReportValidationWarnings" xml:space="preserve">
+    <value>Report schema validation warnings</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="SchemaValidation" xml:space="preserve">
+    <value>Schema Validation</value>
+  </data>
+  <data name="Validation" xml:space="preserve">
+    <value>Validation</value>
+  </data>
+  <data name="ValidationType" xml:space="preserve">
+    <value>Validation Type</value>
+  </data>
+  <data name="WriteUtf8Bom" xml:space="preserve">
+    <value>Write UTF-8 BOM (Byte Order Mark)</value>
+  </data>
+  <data name="XmlParser" xml:space="preserve">
+    <value>XML Parser</value>
+  </data>
+  <data name="XslTransformerSettings" xml:space="preserve">
+    <value>XslTransformer Settings</value>
+  </data>
+  <data name="ParameterNameDoubleError" xml:space="preserve">
+    <value>The parameter name must be unique.</value>
+  </data>
+  <data name="ParameterNameMissingError" xml:space="preserve">
+    <value>Enter a parameter name.</value>
+  </data>
+  <data name="XmlStylesheetDialogButtonApply" xml:space="preserve">
+    <value>Yes, apply</value>
+  </data>
+  <data name="XmlStylesheetDialogButtonDontApply" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="XmlStylesheetDialogQuestion" xml:space="preserve">
+    <value>Shall the selected stylesheets be applied in XslTransformer? Existing stylesheets in the list will be replaced.</value>
+  </data>
+  <data name="XmlStylesheetDialogText" xml:space="preserve">
+    <value>At least one xml-stylesheet declaration was found in the XML input file.</value>
+  </data>
+  <data name="XmlStylesheetDialogTitle" xml:space="preserve">
+    <value>XML Stylesheet Declaration(s) found</value>
+  </data>
+  <data name="XmlStylesheetDialogHeaderHref" xml:space="preserve">
+    <value>href Attribute</value>
+  </data>
+  <data name="XmlStylesheetDialogHeaderMedia" xml:space="preserve">
+    <value>media Attribute</value>
+  </data>
+  <data name="XmlStylesheetDialogHeaderApply" xml:space="preserve">
+    <value>apply</value>
+  </data>
+</root>

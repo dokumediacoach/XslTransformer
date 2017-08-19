@@ -148,7 +148,6 @@
     </Compile>
     <Compile Include="ValueConverters\BaseValueConverter.cs" />
     <Compile Include="ValueConverters\BooleanToVisibilityConverter.cs" />
-    <Compile Include="ViewModel\ErrorDialogViewModel.cs" />
     <Compile Include="ViewModel\XmlStylesheetDialogViewModel.cs" />
     <Page Include="Pages\SettingsPage.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -264,13 +263,6 @@
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\XslTransformer.Core\XslTransformer.Core.csproj">
-      <Project>{78060e2c-647d-4cd5-8217-b15e4aaeabf6}</Project>
-      <Name>XslTransformer.Core</Name>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.5.2">
       <Visible>False</Visible>
       <ProductName>Microsoft .NET Framework 4.5.2 %28x86 und x64%29</ProductName>
@@ -306,6 +298,12 @@
       <IncludeHash>False</IncludeHash>
       <FileType>File</FileType>
     </PublishFile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\XslTransformer.Core\XslTransformer.Core.csproj">
+      <Project>{331019f0-185e-4ae0-97f6-765ece27547a}</Project>
+      <Name>XslTransformer.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.2.0.0\build\dotnet\Fody.targets" Condition="Exists('..\packages\Fody.2.0.0\build\dotnet\Fody.targets')" />
