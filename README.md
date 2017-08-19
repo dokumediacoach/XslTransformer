@@ -4,14 +4,14 @@ XslTransformer is a GUI for testing / applying XSL-Transformations with the Micr
 
 ## Getting Started
 
-To use XslTransformer you need to have .NET Framework v4.5.2 installed.
+To use XslTransformer you need to have .NET Framework v4.5.2 installed.  
 The source code is written in Visual Studio Community 2017.
 
 See [XslTransformer Homepage](http://xsl-transformer.dokumediacoach.de/) (german)
 
 ### Prerequisites
 
-To run XslTransformer you need to have .NET Framework v4.5.2 installed.
+To run XslTransformer you need to have .NET Framework v4.5.2 installed.  
 To use the source code project you need to have Visual Studion 2017 installed.
 
 ### Installing
