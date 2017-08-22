@@ -28,12 +28,25 @@ namespace XslTransformer
         {
             InitializeComponent();
 
-            // Adding content to frame
-            MainFrame.Content = new MainPage();
+            // Adding main page content to frame
+            MainFrame.Content = GetMainPage();
 
             // Delegate when the MainWindow is loaded
             Loaded += MainWindow_Loaded;
         }
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
+        /// Persistent Settings for dependency injection in ViewModels
+        /// </summary>
+        Settings Settings { get; set; } = new Settings();
+
+        #endregion
+
+        #region Event Helper Methods
 
         /// <summary>
         /// When the MainWindow is loaded hook into
@@ -47,18 +60,24 @@ namespace XslTransformer
         }
 
         /// <summary>
-        /// When MainFrame load is completed and Content is MainPage
-        /// hook into transformation start and end events invoked by MainViewModel
+        /// When MainFrame load is completed
+        /// hook into events invoked by ViewModel
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void Nav_LoadCompleted(object sender, NavigationEventArgs e)
         {
-            if (e.Content.GetType() != typeof(MainPage))
-                return;
-            MainViewModel mainVm = (e.Content as MainPage).DataContext as MainViewModel;
-            mainVm.TransformationStart += MainVm_TransformationStart;
-            mainVm.TransformationEnd += MainVm_TransformationEnd;
+            if (e.Content.GetType() == typeof(MainPage))
+            {
+                MainViewModel mainVm = (e.Content as MainPage).DataContext as MainViewModel;
+                mainVm.TransformationStart += MainVm_TransformationStart;
+                mainVm.TransformationEnd += MainVm_TransformationEnd;
+            }
+            else
+            {
+                SettingsViewModel settingsVm = (e.Content as SettingsPage).DataContext as SettingsViewModel;
+                settingsVm.BackToMainPage += SettingsVm_BackToMainPage;
+            }
         }
 
         #endregion
@@ -79,7 +98,16 @@ namespace XslTransformer
 
         #endregion
 
-        #region Settings button
+        #region Back to Main Page Navigation
+
+        private void SettingsVm_BackToMainPage(object sender, EventArgs e)
+        {
+            MainFrame.Navigate(GetMainPage());
+        }
+
+        #endregion
+
+        #region Settings Button
 
         /// <summary>
         /// Settings button click event
@@ -92,16 +120,42 @@ namespace XslTransformer
                 return;
             mFrameNavigationRunning = true;
             if (MainFrame.Content.GetType() == typeof(MainPage))
-                MainFrame.Navigate(new SettingsPage());
+                MainFrame.Navigate(GetSettingsPage());
             else
-                MainFrame.GoBack();
+                MainFrame.Navigate(GetMainPage());
         }
 
         private bool mFrameNavigationRunning = false;
 
         #endregion
 
-        #region MainFrame (Pages) Navigation
+        #region MainFrame Content Helper
+
+        /// <summary>
+        /// Gets a MainPage
+        /// </summary>
+        /// <returns>MainPage instance</returns>
+        private MainPage GetMainPage()
+        {
+            MainPage mainPage = new MainPage();
+            mainPage.DataContext = new MainViewModel(Settings, new XmlCoreProcessor(Settings));
+            return mainPage;
+        }
+
+        /// <summary>
+        /// Gets a SettingsPage
+        /// </summary>
+        /// <returns>SettingsPage instance</returns>
+        private SettingsPage GetSettingsPage()
+        {
+            SettingsPage settingsPage = new SettingsPage();
+            settingsPage.DataContext = new SettingsViewModel(Settings);
+            return settingsPage;
+        }
+
+        #endregion
+
+        #region MainFrame (Pages) Navigation Animation
 
         private bool mAllowDirectNavigation = false;
         private NavigatingCancelEventArgs mNavArgs;

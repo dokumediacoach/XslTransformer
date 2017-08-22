@@ -34,6 +34,11 @@ namespace XslTransformer.Core
         private readonly IReadSettings mSettings;
 
         /// <summary>
+        /// Holds DI reference to XmlProcessor
+        /// </summary>
+        private readonly IProcessXml mXmlProcessor;
+
+        /// <summary>
         /// Stores the index of the selected XSLT Stylesheet in the stylesheet list
         /// </summary>
         private int mSelectedStylesheetIndex;
@@ -75,7 +80,10 @@ namespace XslTransformer.Core
         /// <summary>
         /// The path to the XML input file
         /// </summary>
-        public string XmlInputPath { get; private set; }
+        public string XmlInputPath {
+            get => Data.XmlInputPath;
+            private set => Data.XmlInputPath = value;
+        }
 
         /// <summary>
         /// Path to a new XML input file, gets set from view
@@ -94,7 +102,11 @@ namespace XslTransformer.Core
         /// <summary>
         /// List of XSLT Stylesheets to be applied to XML input file
         /// </summary>
-        public ObservableCollection<XsltStylesheet> Stylesheets { get; private set; } = new ObservableCollection<XsltStylesheet>();
+        public ObservableCollection<XsltStylesheet> Stylesheets
+        {
+            get => Data.Stylesheets;
+            private set => Data.Stylesheets = value;
+        }
 
         /// <summary>
         /// New List of XSL files to be input, gets set from view
@@ -316,9 +328,11 @@ namespace XslTransformer.Core
         /// <summary>
         /// Default constructor
         /// </summary>
-        public MainViewModel(IReadSettings settings)
+        public MainViewModel(IReadSettings settings, IProcessXml xmlProcessor)
         {
             mSettings = settings;
+            mXmlProcessor = xmlProcessor;
+            mXmlProcessor.ShowAsyncMessage += XmlProcessor_ShowAsyncMessage;
             RemoveStylesheetCommand = new RelayCommand(RemoveStylesheet);
             MoveStylesheetUpCommand = new RelayCommand(MoveStylesheetUp);
             MoveStylesheetDownCommand = new RelayCommand(MoveStylesheetDown);
@@ -333,16 +347,52 @@ namespace XslTransformer.Core
         #region Input Helper Methods
 
         /// <summary>
-        /// Checks if file exists, if XML is wellformed and potentially sets XmlInputPath
+        /// Checks if file exists, checks xml and potentially sets XmlInputPath and Stylesheets from XmlStylesheetDeclarations
         /// </summary>
         /// <param name="inputPath">path to input XML file</param>
         private async void CheckAndSetXmlInputPath(string inputPath)
         {
             // check if XML file can be loaded
-            string checkPath = await XmlInput<string>(inputPath);
+            ObservableCollection<XmlStylesheet> xmlStylesheetDeclarations = await mXmlProcessor.CheckXmlFile(inputPath);
 
-            if (!String.IsNullOrEmpty(checkPath))
-                XmlInputPath = checkPath;
+            // return on error
+            if (xmlStylesheetDeclarations == null) return;
+
+            // set xml input file path
+            XmlInputPath = inputPath;
+
+            // set xml-stylesheet declarations list
+            XmlStylesheetDeclarations = xmlStylesheetDeclarations;
+
+            // if there are XmlStylesheet items in the declarations list show custom dialog
+            if (XmlStylesheetDeclarations.Any())
+                await XmlStylesheetDialog();
+
+            // create input file list
+            ObservableCollection<string> inputFileList = new ObservableCollection<string>();
+
+            // get input directory
+            string inputDirectory = Path.GetDirectoryName(inputPath);
+
+            // add selected xml-stylesheets href to input file list (all deselected if user chose No)
+            foreach (XmlStylesheet xs in XmlStylesheetDeclarations)
+            {
+                if (xs.IsSelected)
+                {
+                    // combine input directory and href attribute, if href is absolute Path.Combine will only return that
+                    inputFileList.Add(Path.Combine(inputDirectory, xs.Href));
+                }
+            }
+
+            // if there are XSLT files to input
+            if (inputFileList.Any())
+            {
+                // empty stylesheets list
+                Stylesheets.Clear();
+
+                // try to add input file list to stylesheets
+                await CheckAndInputStylesheets(inputFileList);
+            }
         }
 
         /// <summary>
@@ -350,24 +400,19 @@ namespace XslTransformer.Core
         /// and potentially adds it to XslStylesheets
         /// </summary>
         /// <param name="inputFileList">list of input files to be added to XSL Stylesheets list</param>
-        private async Task CheckAndInputStylesheets(ObservableCollection<string> inputFileList)
+        private async Task CheckAndInputStylesheets(ObservableCollection<string> stylesheetFileList)
         {
-            // Create settings and resolver instances needed for stylesheet check
-            XsltSettings xsltSettings = CreateXsltSettings();
-            XmlUrlResolver stylesheetResolver = CreateXmlUrlResolver();
-
-            // Process all items in the file list
-            foreach (string inputPath in inputFileList)
+            // Process all items in the stylesheet file list
+            foreach (string stylesheetFilePath in stylesheetFileList)
             {
-                // Check if the stylesheet can be loaded
-                string checkPath = await CreateXslt<string>(inputPath, xsltSettings, stylesheetResolver);
+                // check stylesheet
+                bool stylesheetOkay = await mXmlProcessor.CheckStylesheet(stylesheetFilePath);
 
-                // if errors occured, process next item in file list
-                if (String.IsNullOrEmpty(checkPath))
-                    continue;
+                // process next item in stylesheet list on error
+                if (!stylesheetOkay) continue;
 
                 // otherwise, create new item to put it into the stylesheet list
-                XsltStylesheet newStylesheet = new XsltStylesheet() { Path = inputPath };
+                XsltStylesheet newStylesheet = new XsltStylesheet() { Path = stylesheetFilePath };
                 
                 // if a stylesheet is selected, insert the new stylesheet after that one
                 if (IsStylesheetSelected)
@@ -554,149 +599,18 @@ namespace XslTransformer.Core
             TransformationStart.Invoke(null, EventArgs.Empty);
             await RunCommand(() => TransformationIsRunning, async () =>
             {
-                // Create XmlReaderSettings according to current XslTransformerSettings
-                XmlReaderSettings readerSettings = CreateXmlReaderSettings();
+                // Perform xsl transformation according to current Data, get proposal for output file name
+                string outputFileNameProposal = await mXmlProcessor.Transform();
 
-                // Create input reader instance from XML input file
-                XmlReader inputReader = await XmlInput<XmlReader>(XmlInputPath, readerSettings);
-                // Return if there were errors
-                if (inputReader == null)
+                // return on error
+                if (outputFileNameProposal == null)
+                {
+                    mXmlProcessor.OutputStream.Close();
                     return;
-
-                // Create settings and resolver instances needed for stylesheet(s)
-                XsltSettings xsltSettings = CreateXsltSettings();
-                XmlUrlResolver stylesheetResolver = CreateXmlUrlResolver();
-
-                // Create argument list for XSLT parameters
-                XsltArgumentList arguments = new XsltArgumentList();
-
-                // initialize XslCompiledTransform instance
-                XslCompiledTransform xslt = null;
-
-                // Create memory stream for transformation output
-                MemoryStream outputStream = new MemoryStream();
-
-                // Create memory stream for transformation input
-                MemoryStream inputStream = new MemoryStream();
-
-                // Initialize path variable to remember last processed stylesheet
-                string lastProcessedStylesheet = String.Empty;
-
-                // iterate over stylesheet list
-                bool first = true;
-                foreach (XsltStylesheet stylesheet in Stylesheets)
-                {
-                    // create xslt instance
-                    xslt = await CreateXslt<XslCompiledTransform>(stylesheet.Path, xsltSettings, stylesheetResolver);
-
-                    // Return if errors occured
-                    if (xslt == null)
-                        return;
-
-                    // empty out xslt arguments
-                    arguments.Clear();
-
-                    // iterate over parameter list
-                    foreach (StylesheetParameter parameter in stylesheet.Parameters)
-                    {
-                        // add parameter to argument list
-                        arguments.AddParam(parameter.Name, String.Empty, parameter.Value);
-                    }
-
-                    // input stream is used if there are more than one stylesheets in the list
-                    if (!first)
-                    {
-                        // dispose and recreate input stream
-                        inputStream.Close();
-                        inputStream = new MemoryStream();
-
-                        // copy output stream to input stream
-                        outputStream.WriteTo(inputStream);
-
-                        // dispose and recreate output stream
-                        outputStream.Close();
-                        outputStream = new MemoryStream();
-
-                        // reset input stream position to read from the beginning
-                        inputStream.Seek(0, SeekOrigin.Begin);
-
-                        // recreate input reader from input stream with settings
-                        inputReader = XmlReader.Create(inputStream, readerSettings);
-
-                        // try to parse the xml in stream to test it
-                        try
-                        {
-                            while (await inputReader.ReadAsync()) ;
-                        }
-                        catch (Exception e)
-                        {
-                            // if errors occured show error message and return
-                            await AsyncMessage(mStrings.GetString("TransformationResultErrorMsgTitle"), string.Format(mStrings.GetString("TransformationResultErrorMsgText"), lastProcessedStylesheet, e.Message), MessageIcon.Error);
-                            inputStream.Close();
-                            outputStream.Close();
-                            return;
-                        }
-
-                        // reset input stream position to read from the beginning
-                        inputStream.Seek(0, SeekOrigin.Begin);
-
-                        // recreate input reader to read from the beginning
-                        inputReader = XmlReader.Create(inputStream, readerSettings);
-                    }
-
-                    // Try to apply the transformation, put result to output stream
-                    try
-                    {
-                        xslt.Transform(inputReader, arguments, outputStream);
-                    }
-                    catch (Exception e)
-                    {
-                        // if errors occured show error message and return
-                        await AsyncMessage(mStrings.GetString("XslTransformationErrorMsgTitle"), string.Format(mStrings.GetString("XslTransformationErrorMsgText"), stylesheet.Path, e.Message), MessageIcon.Error);
-                        inputStream.Close();
-                        outputStream.Close();
-                        return;
-                    }
-
-                    // remember last processed stylesheets for possible error messages
-                    lastProcessedStylesheet = stylesheet.Path;
-
-                    // reset output stream position to read from the beginning
-                    outputStream.Seek(0, SeekOrigin.Begin);
-
-                    if (first)
-                        first = false;
                 }
-
-                // close input stream as it is no longer needed
-                inputStream.Close();
-
-                // Propose input directory as output directory, set property that is bound to view
+                
+                // Propose input directory as output directory
                 string outputDirectoryProposal = Path.GetDirectoryName(XmlInputPath);
-
-                // Get xml input file name without extension
-                string inputFileNameWithoutExtension = Path.GetFileNameWithoutExtension(XmlInputPath);
-
-                // Get output method (Xml | Html | Text)
-                XmlOutputMethod outputMethod = xslt.OutputSettings.OutputMethod;
-
-                // Make extension proposal dependant from output method
-                string extensionProposal = String.Empty;
-                switch (outputMethod)
-                {
-                    case XmlOutputMethod.Html:
-                        extensionProposal = "html";
-                        break;
-                    case XmlOutputMethod.Text:
-                        extensionProposal = "txt";
-                        break;
-                    default:
-                        extensionProposal = "xml";
-                        break;
-                }
-
-                // Concatenate output file name proposal
-                string outputFileNameProposal = inputFileNameWithoutExtension + ".out." + extensionProposal;
 
                 // Set combined OutputFilePathProposal property, triggering save file dialog in view
                 OutputFilePathProposal = Path.Combine(outputDirectoryProposal, outputFileNameProposal);
@@ -710,7 +624,7 @@ namespace XslTransformer.Core
                 // Return if the user aborted or errors occured (OutputFilePath is set to String.Empty)
                 if (OutputFilePath == String.Empty)
                 {
-                    outputStream.Close();
+                    mXmlProcessor.OutputStream.Close();
                     OutputFilePath = null;
                     OutputFilePathProposal = null;
                     return;
@@ -723,7 +637,7 @@ namespace XslTransformer.Core
                     using (FileStream fileStream = File.Open(OutputFilePath, FileMode.Create, FileAccess.Write))
                     {
                         // If encoding is UTF8 skip byte order mark if set so
-                        if (xslt.OutputSettings.Encoding == Encoding.UTF8 && !mSettings.GetValue<bool>(Setting.WriteUtf8Bom))
+                        if (mXmlProcessor.OutputEncoding == Encoding.UTF8 && !mSettings.GetValue<bool>(Setting.WriteUtf8Bom))
                         {
                             // Get standard utf8 bom-bytes
                             byte[] bom = Encoding.UTF8.GetPreamble();
@@ -731,20 +645,20 @@ namespace XslTransformer.Core
                             // Check if outputStream starts with bom
                             for (int i = 0; i < bom.Length; i++)
                             {
-                                // outputStream.ReadByte() moves position
-                                byte testByte = Convert.ToByte(outputStream.ReadByte());
+                                // stream.ReadByte() moves position
+                                byte testByte = Convert.ToByte(mXmlProcessor.OutputStream.ReadByte());
                                 
                                 // If bytes don't match ...
                                 if (testByte != bom[i])
                                 {
                                     // ... reset position to 0 and break loop
-                                    outputStream.Seek(0, SeekOrigin.Begin);
+                                    mXmlProcessor.OutputStream.Seek(0, SeekOrigin.Begin);
                                     break;
                                 }
                             }
                         }
                         // stream.CopyTo() copies from current stream position until the end
-                        outputStream.CopyTo(fileStream);
+                        mXmlProcessor.OutputStream.CopyTo(fileStream);
                     }
                 }
                 catch(Exception e)
@@ -755,7 +669,7 @@ namespace XslTransformer.Core
                 finally
                 {
                     // be sure the output stream is disposed
-                    outputStream.Close();
+                    mXmlProcessor.OutputStream.Close();
                 }
 
                 // Reset OutputFilePath so it can trigger outputFileSelected again
@@ -780,305 +694,13 @@ namespace XslTransformer.Core
 
         #endregion
 
-        #region XML Helper Methods
-
-        /// <summary>
-        /// Gets XmlInput as file path string or new XmlReader instance
-        /// with XmlReaderSettings according to current XslTransformerSettings
-        /// </summary>
-        /// <typeparam name="T">string for file path or XmlReader for reader instance</typeparam>
-        /// <param name="inputPath">Path to XML input file</param>
-        /// <returns>filePath string / XmlReader instance or null if errors occured</returns>
-        private async Task<T> XmlInput<T>(string inputPath)
-        {
-            // Create XmlReaderSettings according to current XslTransformerSettings
-            XmlReaderSettings settings = CreateXmlReaderSettings();
-
-            return await XmlInput<T>(inputPath, settings);
-        }
-
-        /// <summary>
-        /// Gets XmlInput as file path string or new XmlReader instance
-        /// </summary>
-        /// <typeparam name="T">string for file path or XmlReader for reader instance</typeparam>
-        /// <param name="inputPath">Path to XML input file</param>
-        /// <param name="settings">The XmlReaderSettings instance to process</param>
-        /// <returns>filePath string / XmlReader instance or null if errors occured</returns>
-        private async Task<T> XmlInput<T>(string inputPath, XmlReaderSettings settings)
-        {
-            if (!File.Exists(inputPath))
-            {
-                await AsyncMessage(mStrings.GetString("FileNotFoundMsgTitle"), string.Format(mStrings.GetString("FileNotFoundMsgText"), inputPath), MessageIcon.Error);
-                return default(T);
-            }
-
-            // Create the XmlReader object
-            XmlReader reader = XmlReader.Create(inputPath, settings);
-
-            // Empty list for xml-stylesheet declarations
-            XmlStylesheetDeclarations.Clear();
-
-            // Search for xml-stylesheet declarations after XML input file choice by user (Type is string for path)
-            bool searchXmlStylesheet = (typeof(T).Equals(typeof(string))) ? true : false;
-
-            // Try to parse the file and pick xml-stylesheet declarations
-            try
-            {
-                while (await reader.ReadAsync())
-                {
-                    // search for xml-stylesheet declarations if set so
-                    if (!searchXmlStylesheet)
-                        continue;
-                    // stop searching when root element is reached
-                    if (reader.NodeType == XmlNodeType.Document)
-                    {
-                        searchXmlStylesheet = false;
-                        continue;
-                    }
-
-                    // try next node if current node is not a processing instruction named xml-stylesheet
-                    if (reader.NodeType != XmlNodeType.ProcessingInstruction
-                        || reader.Name != "xml-stylesheet")
-                        continue;
-                    
-                    // create a XML document as a helper to access xml-stylesheet-declaration attributes
-                    XmlDocument stylesheet = new XmlDocument();
-
-                    // load text value into stylesheet document so XPath can be used
-                    stylesheet.LoadXml("<stylesheet " + reader.Value + "/>");
-
-                    // check if xml-stylesheet has a href attribute and the right type attribute value ...
-                    XmlNode stylesheetNode = stylesheet.SelectSingleNode("/stylesheet[@href][@type='text/xsl']");
-
-                    // ... if not continue with next node
-                    if (stylesheetNode == null)
-                        continue;
-
-                    // create xml stylesheet item with Href
-                    XmlStylesheet xmlStylesheetItem = new XmlStylesheet()
-                    {
-                        Href = stylesheetNode.SelectSingleNode("@href").Value
-                    };
-
-                    // check if media attribute is present
-                    string mediaAttributeValue = stylesheetNode.SelectSingleNode("@media")?.Value;
-
-                    // if then add it to item
-                    if (mediaAttributeValue != null)
-                        xmlStylesheetItem.Media = mediaAttributeValue;
-
-                    // add the item to the XmlStylesheetDeclarations list
-                    XmlStylesheetDeclarations.Add(xmlStylesheetItem);
-                }
-            }
-            catch (XmlException e)
-            {
-                await AsyncMessage(mStrings.GetString("XmlInputFileErrorMsgTitle"), string.Format(mStrings.GetString("XmlInputFileErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-            catch (XmlSchemaValidationException e)
-            {
-                await AsyncMessage(mStrings.GetString("XmlInputFileValidationErrorMsgTitle"), string.Format(mStrings.GetString("XmlInputFileValidationErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-            catch (Exception e)
-            {
-                await AsyncMessage(mStrings.GetString("XmlInputFileErrorMsgTitle"), string.Format(mStrings.GetString("XmlInputFileErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-
-            // if there are XmlStylesheet items in the declarations list show custom dialog
-            if (XmlStylesheetDeclarations.Any())
-                await XmlStylesheetDialog();
-
-            // create input file list
-            ObservableCollection<string> inputFileList = new ObservableCollection<string>();
-
-            // get input directory
-            string inputDirectory = Path.GetDirectoryName(inputPath);
-
-            // add selected xml-stylesheets href to input file list (all deselected if user chose No)
-            foreach (XmlStylesheet xs in XmlStylesheetDeclarations)
-            {
-                if (xs.IsSelected)
-                {
-                    // combine input directory and href attribute, if href is absolute Path.Combine will only return that
-                    inputFileList.Add(Path.Combine(inputDirectory, xs.Href));
-                }
-            }
-
-            // if there are XSLT files to input
-            if (inputFileList.Any())
-            {
-                // empty stylesheets list
-                Stylesheets.Clear();
-
-                // try to add input file list to stylesheets
-                await CheckAndInputStylesheets(inputFileList);
-            }
-
-            Type type = typeof(T);
-            object returnValue = default(T);
-            if (type.Equals(typeof(string)))
-                returnValue = inputPath;
-            else
-            {
-                // Recreate the XmlReader object so it can be read from the beginning
-                reader = XmlReader.Create(inputPath, settings);
-                returnValue = reader;
-            }
-            return (T)returnValue;
-        }
-
-        /// <summary>
-        /// Create XmlReaderSettings according to current XslTransformerSettings
-        /// </summary>
-        /// <returns>a new XmlReaderSettings</returns>
-        private XmlReaderSettings CreateXmlReaderSettings()
-        {
-            XmlReaderSettings xmlReaderSettings = new XmlReaderSettings();
-
-            // Make async XmlReader methods available
-            xmlReaderSettings.Async = true;
-
-            // Set the reader settings object to use the default resolver.
-            xmlReaderSettings.XmlResolver = CreateXmlUrlResolver();
-
-            // set Properties according to current XslTransformerSettings
-
-            DtdProcessing dtdProcessing;
-            Enum.TryParse(mSettings.GetValue<XmlReaderDtdProcessing>(Setting.DtdProcessing).ToString(), out dtdProcessing);
-            xmlReaderSettings.DtdProcessing = dtdProcessing;
-
-            ValidationType validationType;
-            Enum.TryParse(mSettings.GetValue<XmlReaderValidationType>(Setting.ValidationType).ToString(), out validationType);
-            xmlReaderSettings.ValidationType = validationType;
-
-            if (!mSettings.GetValue<bool>(Setting.CheckCharacters))
-                xmlReaderSettings.CheckCharacters = false;
-
-            // if validation is not requested return settings
-            if (xmlReaderSettings.ValidationType == ValidationType.None)
-                return xmlReaderSettings;
-
-            // set ValidationFlags according to current XslTransformerSettings
-
-            xmlReaderSettings.ValidationFlags = XmlSchemaValidationFlags.None;
-
-            if (mSettings.GetValue<bool>(Setting.XsdValidationFlag_AllowXmlAttributes))
-                xmlReaderSettings.ValidationFlags |= XmlSchemaValidationFlags.AllowXmlAttributes;
-
-            if (mSettings.GetValue<bool>(Setting.XsdValidationFlag_ProcessIdentityConstraints))
-                xmlReaderSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessIdentityConstraints;
-
-            if (mSettings.GetValue<bool>(Setting.XsdValidationFlag_ProcessSchemaLocation))
-                xmlReaderSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessSchemaLocation;
-
-            if (mSettings.GetValue<bool>(Setting.XsdValidationFlag_ProcessInlineSchema))
-                xmlReaderSettings.ValidationFlags |= XmlSchemaValidationFlags.ProcessInlineSchema;
-
-            // Validation warnings don't throw exceptions ...
-            if (mSettings.GetValue<bool>(Setting.XsdValidationFlag_ReportValidationWarnings))
-            {
-                xmlReaderSettings.ValidationFlags |= XmlSchemaValidationFlags.ReportValidationWarnings;
-                // ... but they can be displayed by using a ValidationEventHandler callback
-                xmlReaderSettings.ValidationEventHandler += new ValidationEventHandler(ValidationCallBack);
-            }
-
-            return xmlReaderSettings;
-        }
-
-        // ValidationEventHandler callback (strangely enough,message overlay seems stuck for seconds before message displays)
-        private async void ValidationCallBack(object sender, ValidationEventArgs e)
-        {
-            // If a ValidationEventHandler is registered also ValidationErrors don't throw exceptions
-            // so a distinction is necessary here
-            if (e.Severity == XmlSeverityType.Warning)
-                await AsyncMessage(mStrings.GetString("XmlValidationWarningMsgTitle"), string.Format(mStrings.GetString("XmlValidationMsgText"), e.Message), MessageIcon.Warning);
-            else
-                await AsyncMessage(mStrings.GetString("XmlValidationErrorMsgTitle"), string.Format(mStrings.GetString("XmlValidationMsgText"), e.Message), MessageIcon.Warning);
-        }
-
-        /// <summary>
-        /// Create XsltSettings according to current XslTransformerSettings
-        /// </summary>
-        /// <returns>a new XsltSettings</returns>
-        private XsltSettings CreateXsltSettings()
-        {
-            XsltSettings xsltSettings = new XsltSettings(
-                mSettings.GetValue<bool>(Setting.EnableDocumentFunction),
-                mSettings.GetValue<bool>(Setting.EnableScript));
-            return xsltSettings;
-        }
-
-        /// <summary>
-        /// Create a xml url resolver with default credentials
-        /// </summary>
-        /// <returns>a new default XmlUrlResolver</returns>
-        private XmlUrlResolver CreateXmlUrlResolver()
-        {
-            XmlUrlResolver resolver = new XmlUrlResolver();
-            resolver.Credentials = CredentialCache.DefaultCredentials;
-            return resolver;
-        }
-
-        /// <summary>
-        /// Creates XsltCompiledTransform to check and return inputPath stylesheet
-        /// or to return the new XsltCompiledTransform instance
-        /// </summary>
-        /// <typeparam name="T">string for file path or XsltCompiledTransform for xslt instance</typeparam>
-        /// <param name="inputPath">Path to XSLT stylesheet file</param>
-        /// <param name="xsltSettings">settings for the creation of XsltCompiledTransform</param>
-        /// <param name="stylesheetResolver">xml url resolver to process </param>
-        /// <returns>filePath string / XsltCompiledTransform instance or null if errors occured</returns>
-        private async Task<T> CreateXslt<T>(string inputPath, XsltSettings xsltSettings, XmlUrlResolver stylesheetResolver)
-        {
-            if (!File.Exists(inputPath))
-            {
-                await AsyncMessage(mStrings.GetString("FileNotFoundMsgTitle"), string.Format(mStrings.GetString("FileNotFoundMsgText"), inputPath), MessageIcon.Error);
-                return default(T);
-            }
-
-            try
-            {
-                // Create a XslCompiledTransform instance and load the stylesheet
-                XslCompiledTransform xslt = new XslCompiledTransform();
-                xslt.Load(inputPath, xsltSettings, stylesheetResolver);
-
-                Type type = typeof(T);
-                object returnValue = default(T);
-                if (type.Equals(typeof(string)))
-                    returnValue = inputPath;
-                else
-                    returnValue = xslt;
-                return (T)returnValue;
-            }
-            catch (XsltException e)
-            {
-                await AsyncMessage(mStrings.GetString("XsltErrorMsgTitle"), string.Format(mStrings.GetString("XsltXsltErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-            catch (XmlException e)
-            {
-                await AsyncMessage(mStrings.GetString("XsltErrorMsgTitle"), string.Format(mStrings.GetString("XsltXmlErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-            catch (Exception e)
-            {
-                await AsyncMessage(mStrings.GetString("XsltErrorMsgTitle"), string.Format(mStrings.GetString("XsltXsltErrorMsgText"), inputPath, e.Message), MessageIcon.Error);
-                return default(T);
-            }
-        }
-
-        #endregion
-
         #region Message Helper Methods
 
         /// <summary>
         /// Show modal error message in view
         /// </summary>
         /// <param name="title">The title of the error message to display</param>
-        /// <param name="message">The message content.</param>
+        /// <param name="message">The message content</param>
         private void Message(string title, string message, MessageIcon icon = MessageIcon.No)
         {
             MessageTitle = title;
@@ -1091,6 +713,98 @@ namespace XslTransformer.Core
             // Is reset here because it does not work from UserControl class after its ShowModalMessageExternal method
             // maybe modal message overlay (kind of new window) is blocking main ui thread
             ShowMessage = false;
+        }
+
+        /// <summary>
+        /// Callback method to display async messages from XmlProcessor
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">the message event arguments</param>
+        private async void XmlProcessor_ShowAsyncMessage(object sender, MessageEventArgs e)
+        {
+            string title;
+            string text = String.Empty;
+            string message;
+            MessageIcon icon;
+
+            // set icon by message type
+            switch (e.MessageType)
+            {
+                case MessageType.XmlValidationWarning:
+                    icon = MessageIcon.Warning;
+                    break;
+                default:
+                    icon = MessageIcon.Error;
+                    break;
+            }
+
+            // set title by message type
+            switch (e.MessageType)
+            {
+                case MessageType.XmlInputFileMalformedXmlError:
+                    title = mStrings.GetString(MessageType.XmlInputFileError.ToString() + "MsgTitle");
+                    break;
+                case MessageType.XmlInputFileInvalidXmlError:
+                    title = mStrings.GetString("XmlInputFileValidationErrorMsgTitle");
+                    break;
+                case MessageType.XsltStylesheetError:
+                case MessageType.XsltMalformedXmlError:
+                    title = mStrings.GetString("XsltErrorMsgTitle");
+                    break;
+                case MessageType.XslTransformationResultError:
+                    title = mStrings.GetString("TransformationResultErrorMsgTitle");
+                    break;
+                default:
+                    title = mStrings.GetString(e.MessageType.ToString() + "MsgTitle");
+                    text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
+                    break;
+            }
+
+            // set text by message type
+            switch (e.MessageType)
+            {
+                case MessageType.XmlInputFileMalformedXmlError:
+                    text = mStrings.GetString(MessageType.XmlInputFileError.ToString() + "MsgText");
+                    break;
+                case MessageType.XmlInputFileInvalidXmlError:
+                case MessageType.XmlValidationWarning:
+                    text = mStrings.GetString("XmlInputFileValidationMsgText");
+                    break;
+                case MessageType.XsltStylesheetError:
+                    text = mStrings.GetString("XsltXsltErrorMsgText");
+                    break;
+                case MessageType.XsltMalformedXmlError:
+                    text = mStrings.GetString("XsltXmlErrorMsgText");
+                    break;
+                case MessageType.XslTransformationResultError:
+                    text = mStrings.GetString("TransformationResultErrorMsgText");
+                    break;
+                default:
+                    text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
+                    break;
+            }
+
+            // set message by message type
+            switch (e.MessageType)
+            {
+                case MessageType.FileNotFoundError:
+                    message = string.Format(text, e.FilePath);
+                    break;
+                case MessageType.XmlValidationWarning:
+                case MessageType.XsltMalformedXmlError:
+                    if (e.FilePath == null)
+                        message = string.Format(text, e.Message);
+                    else
+                        message = string.Format(text, e.FilePath, e.Message);
+                    break;
+                default:
+                    message = string.Format(text, e.FilePath, e.Message);
+                    break;
+            }
+
+            // show message
+            await AsyncMessage(title, message, icon);
+            mXmlProcessor.AsyncMessageShown.Set();
         }
 
         /// <summary>
