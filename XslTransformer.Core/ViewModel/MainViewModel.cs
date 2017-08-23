@@ -316,11 +316,6 @@ namespace XslTransformer.Core
         /// </summary>
         public ICommand TransformCommand { get; set; }
 
-        /// <summary>
-        /// The command to sync the settings from the persistent configuration
-        /// </summary>
-        public ICommand SyncSettingsFromConfigurationCommand { get; set; }
-
         #endregion
 
         #region Constructor
@@ -328,6 +323,8 @@ namespace XslTransformer.Core
         /// <summary>
         /// Default constructor
         /// </summary>
+        /// <param name="settings">readable Settings dependency injection</param>
+        /// <param name="xmlProcessor">xml processor dependency injection</param>
         public MainViewModel(IReadSettings settings, IProcessXml xmlProcessor)
         {
             mSettings = settings;
@@ -339,7 +336,6 @@ namespace XslTransformer.Core
             AddParameterCommand = new RelayCommand(AddParameter);
             RemoveParameterCommand = new RelayCommand(RemoveParameter);
             TransformCommand = new RelayCommand(Transform);
-            SyncSettingsFromConfigurationCommand = new RelayCommand(SyncSettingsFromConfiguration);
         }
 
         #endregion
@@ -684,14 +680,6 @@ namespace XslTransformer.Core
             TransformationEnd.Invoke(null, EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Syncs the settings from the persistent configuration
-        /// </summary>
-        private void SyncSettingsFromConfiguration()
-        {
-            mSettings.SyncFromConfiguration();
-        }
-
         #endregion
 
         #region Message Helper Methods
@@ -739,50 +727,10 @@ namespace XslTransformer.Core
             }
 
             // set title by message type
-            switch (e.MessageType)
-            {
-                case MessageType.XmlInputFileMalformedXmlError:
-                    title = mStrings.GetString(MessageType.XmlInputFileError.ToString() + "MsgTitle");
-                    break;
-                case MessageType.XmlInputFileInvalidXmlError:
-                    title = mStrings.GetString("XmlInputFileValidationErrorMsgTitle");
-                    break;
-                case MessageType.XsltStylesheetError:
-                case MessageType.XsltMalformedXmlError:
-                    title = mStrings.GetString("XsltErrorMsgTitle");
-                    break;
-                case MessageType.XslTransformationResultError:
-                    title = mStrings.GetString("TransformationResultErrorMsgTitle");
-                    break;
-                default:
-                    title = mStrings.GetString(e.MessageType.ToString() + "MsgTitle");
-                    text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
-                    break;
-            }
+            title = mStrings.GetString(e.MessageType.ToString() + "MsgTitle");
 
             // set text by message type
-            switch (e.MessageType)
-            {
-                case MessageType.XmlInputFileMalformedXmlError:
-                    text = mStrings.GetString(MessageType.XmlInputFileError.ToString() + "MsgText");
-                    break;
-                case MessageType.XmlInputFileInvalidXmlError:
-                case MessageType.XmlValidationWarning:
-                    text = mStrings.GetString("XmlInputFileValidationMsgText");
-                    break;
-                case MessageType.XsltStylesheetError:
-                    text = mStrings.GetString("XsltXsltErrorMsgText");
-                    break;
-                case MessageType.XsltMalformedXmlError:
-                    text = mStrings.GetString("XsltXmlErrorMsgText");
-                    break;
-                case MessageType.XslTransformationResultError:
-                    text = mStrings.GetString("TransformationResultErrorMsgText");
-                    break;
-                default:
-                    text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
-                    break;
-            }
+            text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
 
             // set message by message type
             switch (e.MessageType)
@@ -791,11 +739,8 @@ namespace XslTransformer.Core
                     message = string.Format(text, e.FilePath);
                     break;
                 case MessageType.XmlValidationWarning:
-                case MessageType.XsltMalformedXmlError:
-                    if (e.FilePath == null)
-                        message = string.Format(text, e.Message);
-                    else
-                        message = string.Format(text, e.FilePath, e.Message);
+                case MessageType.XmlValidationError:
+                    message = string.Format(text, e.Message);
                     break;
                 default:
                     message = string.Format(text, e.FilePath, e.Message);

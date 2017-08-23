@@ -7,8 +7,10 @@
         XmlInputFileInvalidXmlError,
         XmlInputFileError,
         XmlValidationWarning,
+        XmlValidationError,
         XsltStylesheetError,
         XsltMalformedXmlError,
+        XsltFileError,
         XslTransformationResultError,
         XslTransformationError
     }

@@ -335,28 +335,6 @@ namespace XslTransformer.Core.Strings {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Last processed XSLT stylesheet:
-        ///‹{0}›
-        ///
-        ///Description:
-        ///{1} ähnelt.
-        /// </summary>
-        public static string TransformationResultErrorMsgText {
-            get {
-                return ResourceManager.GetString("TransformationResultErrorMsgText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die Error While Further Processing a Transformation Result ähnelt.
-        /// </summary>
-        public static string TransformationResultErrorMsgTitle {
-            get {
-                return ResourceManager.GetString("TransformationResultErrorMsgTitle", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die The transformation was successfully completed. ähnelt.
         /// </summary>
         public static string TransformationSuccessMsgText {
@@ -446,18 +424,39 @@ namespace XslTransformer.Core.Strings {
         ///Description:
         ///{1} ähnelt.
         /// </summary>
-        public static string XmlInputFileValidationErrorMsgText {
+        public static string XmlInputFileInvalidXmlErrorMsgText {
             get {
-                return ResourceManager.GetString("XmlInputFileValidationErrorMsgText", resourceCulture);
+                return ResourceManager.GetString("XmlInputFileInvalidXmlErrorMsgText", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Validation Error while Loading XML Input File ähnelt.
         /// </summary>
-        public static string XmlInputFileValidationErrorMsgTitle {
+        public static string XmlInputFileInvalidXmlErrorMsgTitle {
             get {
-                return ResourceManager.GetString("XmlInputFileValidationErrorMsgTitle", resourceCulture);
+                return ResourceManager.GetString("XmlInputFileInvalidXmlErrorMsgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File ‹{0}› is not well-formed:
+        ///
+        ///Description:
+        ///{1} ähnelt.
+        /// </summary>
+        public static string XmlInputFileMalformedXmlErrorMsgText {
+            get {
+                return ResourceManager.GetString("XmlInputFileMalformedXmlErrorMsgText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die XML not Well-Formed in XML Input File ähnelt.
+        /// </summary>
+        public static string XmlInputFileMalformedXmlErrorMsgTitle {
+            get {
+                return ResourceManager.GetString("XmlInputFileMalformedXmlErrorMsgTitle", resourceCulture);
             }
         }
         
@@ -543,6 +542,16 @@ namespace XslTransformer.Core.Strings {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Description:
+        ///{0} ähnelt.
+        /// </summary>
+        public static string XmlValidationErrorMsgText {
+            get {
+                return ResourceManager.GetString("XmlValidationErrorMsgText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Validation Error ähnelt.
         /// </summary>
         public static string XmlValidationErrorMsgTitle {
@@ -555,9 +564,9 @@ namespace XslTransformer.Core.Strings {
         ///   Sucht eine lokalisierte Zeichenfolge, die Description:
         ///{0} ähnelt.
         /// </summary>
-        public static string XmlValidationMsgText {
+        public static string XmlValidationWarningMsgText {
             get {
-                return ResourceManager.GetString("XmlValidationMsgText", resourceCulture);
+                return ResourceManager.GetString("XmlValidationWarningMsgText", resourceCulture);
             }
         }
         
@@ -576,18 +585,39 @@ namespace XslTransformer.Core.Strings {
         ///Description:
         ///{1} ähnelt.
         /// </summary>
-        public static string XsltErrorMsgText {
+        public static string XsltFileErrorMsgText {
             get {
-                return ResourceManager.GetString("XsltErrorMsgText", resourceCulture);
+                return ResourceManager.GetString("XsltFileErrorMsgText", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Error Loading XSLT File ähnelt.
         /// </summary>
-        public static string XsltErrorMsgTitle {
+        public static string XsltFileErrorMsgTitle {
             get {
-                return ResourceManager.GetString("XsltErrorMsgTitle", resourceCulture);
+                return ResourceManager.GetString("XsltFileErrorMsgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die File ‹{0}› is not well-formed:
+        ///
+        ///Description:
+        ///{1} ähnelt.
+        /// </summary>
+        public static string XsltMalformedXmlErrorMsgText {
+            get {
+                return ResourceManager.GetString("XsltMalformedXmlErrorMsgText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die XML not Well-Formed in XSLT File ähnelt.
+        /// </summary>
+        public static string XsltMalformedXmlErrorMsgTitle {
+            get {
+                return ResourceManager.GetString("XsltMalformedXmlErrorMsgTitle", resourceCulture);
             }
         }
         
@@ -623,6 +653,28 @@ namespace XslTransformer.Core.Strings {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Last processed XSLT stylesheet:
+        ///‹{0}›
+        ///
+        ///Description:
+        ///{1} ähnelt.
+        /// </summary>
+        public static string XslTransformationResultErrorMsgText {
+            get {
+                return ResourceManager.GetString("XslTransformationResultErrorMsgText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Error While Further Processing a Transformation Result ähnelt.
+        /// </summary>
+        public static string XslTransformationResultErrorMsgTitle {
+            get {
+                return ResourceManager.GetString("XslTransformationResultErrorMsgTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die XSL Transformation(s) ähnelt.
         /// </summary>
         public static string XslTransformations {
@@ -641,26 +693,23 @@ namespace XslTransformer.Core.Strings {
         }
         
         /// <summary>
-        ///   Sucht eine lokalisierte Zeichenfolge, die File ‹{0}› is not well-formed:
-        ///
-        ///Description:
-        ///{1} ähnelt.
-        /// </summary>
-        public static string XsltXmlErrorMsgText {
-            get {
-                return ResourceManager.GetString("XsltXmlErrorMsgText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die File ‹{0}› contains Errors:
         ///
         ///Description:
         ///{1} ähnelt.
         /// </summary>
-        public static string XsltXsltErrorMsgText {
+        public static string XsltStylesheetErrorMsgText {
             get {
-                return ResourceManager.GetString("XsltXsltErrorMsgText", resourceCulture);
+                return ResourceManager.GetString("XsltStylesheetErrorMsgText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Error in XSLT File ähnelt.
+        /// </summary>
+        public static string XsltStylesheetErrorMsgTitle {
+            get {
+                return ResourceManager.GetString("XsltStylesheetErrorMsgTitle", resourceCulture);
             }
         }
     }

@@ -168,14 +168,14 @@ Description:
   <data name="SaveResultFileDialogTitle" xml:space="preserve">
     <value>Save Result File</value>
   </data>
-  <data name="TransformationResultErrorMsgText" xml:space="preserve">
+  <data name="XslTransformationResultErrorMsgText" xml:space="preserve">
     <value>Last processed XSLT stylesheet:
 ‹{0}›
 
 Description:
 {1}</value>
   </data>
-  <data name="TransformationResultErrorMsgTitle" xml:space="preserve">
+  <data name="XslTransformationResultErrorMsgTitle" xml:space="preserve">
     <value>Error While Further Processing a Transformation Result</value>
   </data>
   <data name="TransformationSuccessMsgText" xml:space="preserve">
@@ -199,32 +199,32 @@ Description:
   <data name="XmlInputFileErrorMsgTitle" xml:space="preserve">
     <value>Error Loading XML Input File</value>
   </data>
-  <data name="XmlInputFileValidationErrorMsgText" xml:space="preserve">
+  <data name="XmlInputFileInvalidXmlErrorMsgText" xml:space="preserve">
     <value>File ‹{0}›
 
 Description:
 {1}</value>
   </data>
-  <data name="XmlInputFileValidationErrorMsgTitle" xml:space="preserve">
+  <data name="XmlInputFileInvalidXmlErrorMsgTitle" xml:space="preserve">
     <value>Validation Error while Loading XML Input File</value>
   </data>
   <data name="XmlValidationErrorMsgTitle" xml:space="preserve">
     <value>Validation Error</value>
   </data>
-  <data name="XmlValidationMsgText" xml:space="preserve">
+  <data name="XmlValidationErrorMsgText" xml:space="preserve">
     <value>Description:
 {0}</value>
   </data>
   <data name="XmlValidationWarningMsgTitle" xml:space="preserve">
     <value>Validation Warning</value>
   </data>
-  <data name="XsltErrorMsgText" xml:space="preserve">
+  <data name="XsltFileErrorMsgText" xml:space="preserve">
     <value>File ‹{0}›
 
 Description:
 {1}</value>
   </data>
-  <data name="XsltErrorMsgTitle" xml:space="preserve">
+  <data name="XsltFileErrorMsgTitle" xml:space="preserve">
     <value>Error Loading XSLT File</value>
   </data>
   <data name="XsltParameters" xml:space="preserve">
@@ -243,13 +243,13 @@ Description:
   <data name="XslTransformations" xml:space="preserve">
     <value>XSL Transformation(s)</value>
   </data>
-  <data name="XsltXmlErrorMsgText" xml:space="preserve">
+  <data name="XsltMalformedXmlErrorMsgText" xml:space="preserve">
     <value>File ‹{0}› is not well-formed:
 
 Description:
 {1}</value>
   </data>
-  <data name="XsltXsltErrorMsgText" xml:space="preserve">
+  <data name="XsltStylesheetErrorMsgText" xml:space="preserve">
     <value>File ‹{0}› contains Errors:
 
 Description:
@@ -336,5 +336,24 @@ xsi:noNamespaceSchemaLocation)</value>
   </data>
   <data name="XmlStylesheetDialogHeaderApply" xml:space="preserve">
     <value>apply</value>
+  </data>
+  <data name="XmlInputFileMalformedXmlErrorMsgText" xml:space="preserve">
+    <value>File ‹{0}› is not well-formed:
+
+Description:
+{1}</value>
+  </data>
+  <data name="XmlInputFileMalformedXmlErrorMsgTitle" xml:space="preserve">
+    <value>XML not Well-Formed in XML Input File</value>
+  </data>
+  <data name="XmlValidationWarningMsgText" xml:space="preserve">
+    <value>Description:
+{0}</value>
+  </data>
+  <data name="XsltMalformedXmlErrorMsgTitle" xml:space="preserve">
+    <value>XML not Well-Formed in XSLT File</value>
+  </data>
+  <data name="XsltStylesheetErrorMsgTitle" xml:space="preserve">
+    <value>Error in XSLT File</value>
   </data>
 </root>

@@ -180,19 +180,19 @@ namespace XslTransformer.Core
                 XslCompiledTransform xslt = new XslCompiledTransform();
                 xslt.Load(stylesheetFilePath, mXsltSettings, mXmlUrlResolver);
             }
-            catch (XsltException e)
-            {
-                await Message(MessageType.XsltStylesheetError, stylesheetFilePath, e.Message);
-                return false;
-            }
             catch (XmlException e)
             {
                 await Message(MessageType.XsltMalformedXmlError, stylesheetFilePath, e.Message);
                 return false;
             }
-            catch (Exception e)
+            catch (XsltException e)
             {
                 await Message(MessageType.XsltStylesheetError, stylesheetFilePath, e.Message);
+                return false;
+            }
+            catch (Exception e)
+            {
+                await Message(MessageType.XsltFileError, stylesheetFilePath, e.Message);
                 return false;
             }
 
@@ -422,7 +422,7 @@ namespace XslTransformer.Core
             if (e.Severity == XmlSeverityType.Warning)
                 await Message(MessageType.XmlValidationWarning, null, e.Exception.Message);
             else
-                await Message(MessageType.XsltMalformedXmlError, null, e.Exception.Message);
+                await Message(MessageType.XmlValidationError, null, e.Exception.Message);
         }
 
         /// <summary>

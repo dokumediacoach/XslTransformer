@@ -13,7 +13,7 @@ namespace XslTransformer.Core
         /// Parses xml file to check it for errors.
         /// </summary>
         /// <param name="xmlFilePath">path to xml file</param>
-        /// <returns>awaitable Task with XmlStylesheetDeclarations found in xml file or null if errors occur</returns>
+        /// <returns>awaitable Task with XmlStylesheetDeclarations found in xml file or null if errors occured</returns>
         Task<ObservableCollection<XmlStylesheet>> CheckXmlFile(string xmlFilePath);
 
         /// <summary>
