@@ -14,6 +14,8 @@ namespace XslTransformer.Core
 {
     public class XmlCoreProcessor : IProcessXml
     {
+        #region Constructor
+
         /// <summary>
         /// Default constructor, injecting settings
         /// </summary>
@@ -25,6 +27,10 @@ namespace XslTransformer.Core
             mXsltSettings = CreateXsltSettings();
             mXmlUrlResolver = CreateXmlUrlResolver();
         }
+
+        #endregion
+
+        #region Private Members
 
         /// <summary>
         /// Holds DI reference to XslTransformerSettings for reading
@@ -47,6 +53,25 @@ namespace XslTransformer.Core
         private XmlUrlResolver mXmlUrlResolver;
 
         /// <summary>
+        /// Type of message to be displayed
+        /// </summary>
+        private MessageType mMessageType;
+
+        /// <summary>
+        /// String representations of that objects will be included in message by String.Format method
+        /// </summary>
+        private object[] mMessageParams;
+
+        /// <summary>
+        /// Indicates if a message shall be displayed in view
+        /// </summary>
+        private bool mShowMessage = false;
+
+        #endregion
+
+        #region Public Properties
+
+        /// <summary>
         /// Memory stream for transformation output
         /// </summary>
         public MemoryStream OutputStream { get; private set; }
@@ -55,6 +80,10 @@ namespace XslTransformer.Core
         /// Stores output encoding
         /// </summary>
         public Encoding OutputEncoding { get; private set; }
+
+        #endregion
+
+        #region Public Events
 
         /// <summary>
         /// Event that gets invoked when error or warning messages are to be displayed
@@ -66,6 +95,10 @@ namespace XslTransformer.Core
         /// </summary>
         public AutoResetEvent AsyncMessageShown { get; set; } = new AutoResetEvent(false);
 
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// Parses xml file to check it for errors and find xml-stylesheet declarations.
         /// </summary>
@@ -76,7 +109,8 @@ namespace XslTransformer.Core
             // Show message and return null if file does not exist
             if (!File.Exists(xmlFilePath))
             {
-                await Message(MessageType.FileNotFoundError, xmlFilePath);
+                PrepareMessage(MessageType.FileNotFoundError, new object[] { xmlFilePath });
+                await MessageAsync();
                 return null;
             }
 
@@ -142,18 +176,25 @@ namespace XslTransformer.Core
             }
             catch (XmlException e)
             {
-                await Message(MessageType.XmlInputFileMalformedXmlError, xmlFilePath, e.Message);
-                return null;
+                PrepareMessage(MessageType.XmlInputFileMalformedXmlError, new object[] { xmlFilePath, e.Message });
             }
             catch (XmlSchemaValidationException e)
             {
-                await Message(MessageType.XmlInputFileInvalidXmlError, xmlFilePath, e.Message);
-                return null;
+                PrepareMessage(MessageType.XmlInputFileInvalidXmlError, new object[] { xmlFilePath, e.Message });
             }
             catch (Exception e)
             {
-                await Message(MessageType.XmlInputFileError, xmlFilePath, e.Message);
-                return null;
+                PrepareMessage(MessageType.XmlInputFileError, new object[] { xmlFilePath, e.Message });
+            }
+
+            // if show message is triggered (can also happen by ValidationCallback if ValidationWarnings shall be displayed)
+            if (mShowMessage)
+            {
+                // show message
+                await MessageAsync();
+                // if it is an error message return null
+                if (mMessageType != MessageType.XmlValidationWarning)
+                    return null;
             }
 
             // return collected xml-stylesheet declarations
@@ -170,7 +211,8 @@ namespace XslTransformer.Core
             // Show message and return false if xslt file does not exist
             if (!File.Exists(stylesheetFilePath))
             {
-                await Message(MessageType.FileNotFoundError, stylesheetFilePath);
+                PrepareMessage(MessageType.FileNotFoundError, new object[] { stylesheetFilePath });
+                await MessageAsync();
                 return false;
             }
 
@@ -182,17 +224,21 @@ namespace XslTransformer.Core
             }
             catch (XmlException e)
             {
-                await Message(MessageType.XsltMalformedXmlError, stylesheetFilePath, e.Message);
-                return false;
+                PrepareMessage(MessageType.XsltMalformedXmlError, new object[] { stylesheetFilePath, e.Message });
             }
             catch (XsltException e)
             {
-                await Message(MessageType.XsltStylesheetError, stylesheetFilePath, e.Message);
-                return false;
+                PrepareMessage(MessageType.XsltStylesheetError, new object[] { stylesheetFilePath, e.Message });
             }
             catch (Exception e)
             {
-                await Message(MessageType.XsltFileError, stylesheetFilePath, e.Message);
+                PrepareMessage(MessageType.XsltFileError, new object[] { stylesheetFilePath, e.Message });
+            }
+
+            // if triggered show message and return false
+            if (mShowMessage)
+            {
+                await MessageAsync();
                 return false;
             }
 
@@ -286,7 +332,8 @@ namespace XslTransformer.Core
                     }
                     catch (Exception e)
                     {
-                        await Message(MessageType.XslTransformationResultError, lastProcessedStylesheet, e.Message);
+                        PrepareMessage(MessageType.XslTransformationResultError, new object[] { lastProcessedStylesheet, e.Message });
+                        await MessageAsync();
                         inputStream.Close();
                         OutputStream.Close();
                         return null;
@@ -306,7 +353,8 @@ namespace XslTransformer.Core
                 }
                 catch (Exception e)
                 {
-                    await Message(MessageType.XslTransformationError, stylesheet.Path, e.Message);
+                    PrepareMessage(MessageType.XslTransformationError, new object[] { stylesheet.Path, e.Message });
+                    await MessageAsync();
                     inputStream.Close();
                     OutputStream.Close();
                     return null;
@@ -356,6 +404,10 @@ namespace XslTransformer.Core
             return inputFileNameWithoutExtension + ".out." + extensionProposal;
         }
 
+        #endregion
+
+        #region XML Helper Methods
+
         /// <summary>
         /// Create XmlReaderSettings according to current XslTransformerSettings
         /// </summary>
@@ -372,12 +424,10 @@ namespace XslTransformer.Core
 
             // set Properties according to current XslTransformerSettings
 
-            DtdProcessing dtdProcessing;
-            Enum.TryParse(mSettings.GetValue<XmlReaderDtdProcessing>(Setting.DtdProcessing).ToString(), out dtdProcessing);
+            Enum.TryParse(mSettings.GetValue<XmlReaderDtdProcessing>(Setting.DtdProcessing).ToString(), out DtdProcessing dtdProcessing);
             xmlReaderSettings.DtdProcessing = dtdProcessing;
 
-            ValidationType validationType;
-            Enum.TryParse(mSettings.GetValue<XmlReaderValidationType>(Setting.ValidationType).ToString(), out validationType);
+            Enum.TryParse(mSettings.GetValue<XmlReaderValidationType>(Setting.ValidationType).ToString(), out ValidationType validationType);
             xmlReaderSettings.ValidationType = validationType;
 
             if (!mSettings.GetValue<bool>(Setting.CheckCharacters))
@@ -414,15 +464,19 @@ namespace XslTransformer.Core
             return xmlReaderSettings;
         }
 
-        // ValidationEventHandler callback (strangely enough, message overlay seems stuck for seconds before message displays)
-        private async void ValidationCallBack(object sender, ValidationEventArgs e)
+        /// <summary>
+        /// ValidationEventHandler callback method prepares message to be shown in view
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e">the validation event arguments</param>
+        private void ValidationCallBack(object sender, ValidationEventArgs e)
         {
             // If a ValidationEventHandler is registered also ValidationErrors don't throw exceptions
             // so a distinction is necessary here
             if (e.Severity == XmlSeverityType.Warning)
-                await Message(MessageType.XmlValidationWarning, null, e.Exception.Message);
+                PrepareMessage(MessageType.XmlValidationWarning, new object[] { e.Exception.Message });
             else
-                await Message(MessageType.XmlValidationError, null, e.Exception.Message);
+                PrepareMessage(MessageType.XmlValidationError, new object[] { e.Exception.Message });
         }
 
         /// <summary>
@@ -442,26 +496,49 @@ namespace XslTransformer.Core
             Credentials = CredentialCache.DefaultCredentials
         };
 
+        #endregion
+
+        #region Message Helper Methods
+
+        /// <summary>
+        /// Prepares a message (error or warning) to be shown in view
+        /// </summary>
+        /// <remarks>
+        /// Sets member fields for message content
+        /// </remarks>
+        /// <param name="messageType">The type of message to be displayed</param>
+        /// <param name="messageParams">String representations of these objects will be included in message</param>
+        private void PrepareMessage(MessageType messageType, object[] messageParams)
+        {
+            // set member fields
+            mMessageType = messageType;
+            mMessageParams = messageParams;
+            mShowMessage = true;
+        }
+
         /// <summary>
         /// Invokes event to display message and waits for auto reset event that is fired when message is displayed.
         /// </summary>
-        /// <param name="messageType">The type of message to be displayed</param>
-        /// <param name="filePath">the optional path to the processed file where error occured</param>
-        /// <param name="message">the exception message to be included in message display</param>
-        /// <returns></returns>
-        private async Task Message(MessageType messageType, string filePath = null, string message = null)
+        /// <returns>awaitable Task</returns>
+        private async Task MessageAsync()
         {
+            // Show message by invoking the corresponding event
             ShowAsyncMessage?.Invoke(null, new MessageEventArgs
             {
-                MessageType = messageType,
-                FilePath = filePath,
-                Message = message
+                MessageType = mMessageType,
+                MessageParams = mMessageParams
             });
+
+            // Wait until the message is shown (using Task.Run not to block UI Thread)
             await Task.Run(() =>
             {
                 AsyncMessageShown.WaitOne();
             });
-            return;
+
+            // Reset show message field
+            mShowMessage = false;
         }
+
+        #endregion
     }
 }

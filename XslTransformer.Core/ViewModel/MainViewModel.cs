@@ -4,12 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using System.Xml;
-using System.Xml.Schema;
 using PropertyChanged;
 using System.Threading;
-using System.Net;
-using System.Xml.Xsl;
 using System.Text;
 using System.Resources;
 using System.Reflection;
@@ -199,11 +195,6 @@ namespace XslTransformer.Core
         /// Icon of a message to be displayed in view
         /// </summary>
         public MessageIcon DisplayMessageIcon { get; set; } = MessageIcon.No;
-
-        /// <summary>
-        /// Indicates if a modal message shall be displayed in view
-        /// </summary>
-        public bool ShowMessage { get; set; } = false;
         
         /// <summary>
         /// Indicates if a awaitable async message shall be displayed in view
@@ -252,13 +243,6 @@ namespace XslTransformer.Core
         /// Event that gets invoked when XSLT Transformation starts
         /// </summary>
         public event EventHandler<EventArgs> TransformationEnd;
-
-        /*
-        /// <summary>
-        /// Proposal for the output directory for the XSLT Transformation result file
-        /// </summary>
-        public string OutputDirectoryProposal { get; set; }
-        */
 
         /// <summary>
         /// Proposal for the output path of the XSLT Transformation result file,
@@ -659,7 +643,7 @@ namespace XslTransformer.Core
                 }
                 catch(Exception e)
                 {
-                    await AsyncMessage(mStrings.GetString("OutputFileErrorMsgTitle"), string.Format(mStrings.GetString("OutputFileErrorMsgText"), OutputFilePath, e.Message), MessageIcon.Error);
+                    await MessageAsync(MessageType.OutputFileError, new object[] { OutputFilePath, e.Message });
                     return;
                 }
                 finally
@@ -675,7 +659,7 @@ namespace XslTransformer.Core
                 OutputFilePathProposal = null;
 
                 // Success message
-                await AsyncMessage(mStrings.GetString("TransformationSuccessMsgTitle"), mStrings.GetString("TransformationSuccessMsgText"), MessageIcon.Success);
+                await MessageAsync(MessageType.TransformationSuccess);
             });
             TransformationEnd.Invoke(null, EventArgs.Empty);
         }
@@ -685,39 +669,33 @@ namespace XslTransformer.Core
         #region Message Helper Methods
 
         /// <summary>
-        /// Show modal error message in view
-        /// </summary>
-        /// <param name="title">The title of the error message to display</param>
-        /// <param name="message">The message content</param>
-        private void Message(string title, string message, MessageIcon icon = MessageIcon.No)
-        {
-            MessageTitle = title;
-            MessageText = message;
-            DisplayMessageIcon = icon;
-
-            // ShowMessage triggers the modal message overlay in MessageDialog UserControl
-            ShowMessage = true;
-
-            // Is reset here because it does not work from UserControl class after its ShowModalMessageExternal method
-            // maybe modal message overlay (kind of new window) is blocking main ui thread
-            ShowMessage = false;
-        }
-
-        /// <summary>
         /// Callback method to display async messages from XmlProcessor
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e">the message event arguments</param>
         private async void XmlProcessor_ShowAsyncMessage(object sender, MessageEventArgs e)
         {
-            string title;
-            string text = String.Empty;
-            string message;
-            MessageIcon icon;
+            // show message
+            await MessageAsync(e.MessageType, e.MessageParams);
+            // fire auto reset event
+            mXmlProcessor.AsyncMessageShown.Set();
+        }
 
+        /// <summary>
+        /// Shows awaitable async message in view
+        /// </summary>
+        /// <param name="messageType">The type of message to be displayed</param>
+        /// <param name="messageParams">String representations of these objects will be included in message</param>
+        /// <returns>awaitable Task</returns>
+        private async Task MessageAsync(MessageType messageType, object[] messageParams = null)
+        {
             // set icon by message type
-            switch (e.MessageType)
+            MessageIcon icon;
+            switch (messageType)
             {
+                case MessageType.TransformationSuccess:
+                    icon = MessageIcon.Success;
+                    break;
                 case MessageType.XmlValidationWarning:
                     icon = MessageIcon.Warning;
                     break;
@@ -726,41 +704,21 @@ namespace XslTransformer.Core
                     break;
             }
 
-            // set title by message type
-            title = mStrings.GetString(e.MessageType.ToString() + "MsgTitle");
+            // get title by message type
+            string title = mStrings.GetString(messageType.ToString() + "MsgTitle");
 
-            // set text by message type
-            text = mStrings.GetString(e.MessageType.ToString() + "MsgText");
+            // get text string by message type
+            string text = mStrings.GetString(messageType.ToString() + "MsgText");
 
-            // set message by message type
-            switch (e.MessageType)
-            {
-                case MessageType.FileNotFoundError:
-                    message = string.Format(text, e.FilePath);
-                    break;
-                case MessageType.XmlValidationWarning:
-                case MessageType.XmlValidationError:
-                    message = string.Format(text, e.Message);
-                    break;
-                default:
-                    message = string.Format(text, e.FilePath, e.Message);
-                    break;
-            }
+            // format text string by message params if present
+            string message;
+            if (messageParams == null)
+                message = text;
+            else
+                message = String.Format(text, messageParams);
 
-            // show message
-            await AsyncMessage(title, message, icon);
-            mXmlProcessor.AsyncMessageShown.Set();
-        }
+            // Set message properties that are bound to view (MessageDialog UserControl)
 
-        /// <summary>
-        /// Show awaitable async error message in view
-        /// </summary>
-        /// <param name="title">The title of the error message to display</param>
-        /// <param name="message">The message content</param>
-        /// <param name="icon">The message icon</param>
-        /// <returns>awaitable Task</returns>
-        private async Task AsyncMessage(string title, string message, MessageIcon icon = MessageIcon.No)
-        {
             MessageTitle = title;
             MessageText = message;
             DisplayMessageIcon = icon;
@@ -800,3 +758,4 @@ namespace XslTransformer.Core
 }
 
 // DLL blocked ? |win| + |r| > taskkill /im msbuild.exe /f /t
+// Seems to be fixed with Visual Studio Version 15.3.2

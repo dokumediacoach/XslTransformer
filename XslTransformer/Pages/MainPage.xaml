@@ -149,8 +149,7 @@
             </StackPanel>
 
             <!-- Message Dialogs encapsulated in UserControl -->
-            <UserControls:MessageDialog Show="{Binding ShowMessage}"
-                                        ShowAsync="{Binding ShowAsyncMessage}"
+            <UserControls:MessageDialog ShowAsync="{Binding ShowAsyncMessage}"
                                         Title="{Binding MessageTitle}"
                                         Text="{Binding MessageText}"
                                         Icon="{Binding DisplayMessageIcon}"/>

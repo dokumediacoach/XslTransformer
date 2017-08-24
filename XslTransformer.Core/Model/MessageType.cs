@@ -12,6 +12,8 @@
         XsltMalformedXmlError,
         XsltFileError,
         XslTransformationResultError,
-        XslTransformationError
+        XslTransformationError,
+        OutputFileError,
+        TransformationSuccess
     }
 }

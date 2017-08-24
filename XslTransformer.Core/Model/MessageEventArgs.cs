@@ -10,13 +10,9 @@ namespace XslTransformer.Core
         public MessageType MessageType { get; set; }
 
         /// <summary>
-        /// The path to the processed file (if any)
+        /// The string representations of the objects in the array will
+        /// replace the format items in the message (using String.Format method)
         /// </summary>
-        public string FilePath { get; set; }
-
-        /// <summary>
-        /// The exception message to be included in message display
-        /// </summary>
-        public string Message { get; set; }
+        public object[] MessageParams { get; set; }
     }
 }

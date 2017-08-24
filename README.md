@@ -33,5 +33,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 * Using the great [mahapps.metro](https://github.com/MahApps/MahApps.Metro) framework
 * Using [PropertyChanged.Fody](https://github.com/Fody/PropertyChanged) to simplify writing ViewModels
-* This is my first C# / WPF development. I tried to put everything re-usable in a .NET Core 2.0 library. It could be more modular, especially MainViewModel class got quite big.
+* This is my first C# / WPF development. I tried to put everything re-usable in a .NET Core 2.0 library.
 * Would not have been enabled without [these great video tutorials](https://www.youtube.com/watch?v=Vjldip84CXQ&list=PLrW43fNmjaQVYF4zgsD0oL9Iv6u23PI6M)
