@@ -23,9 +23,9 @@ namespace XslTransformer.Core
         public XmlCoreProcessor(IReadSettings settings)
         {
             mSettings = settings;
+            mXmlUrlResolver = CreateXmlUrlResolver();
             mXmlReaderSettings = CreateXmlReaderSettings();
             mXsltSettings = CreateXsltSettings();
-            mXmlUrlResolver = CreateXmlUrlResolver();
         }
 
         #endregion
@@ -409,6 +409,15 @@ namespace XslTransformer.Core
         #region XML Helper Methods
 
         /// <summary>
+        /// Create a xml url resolver with default credentials
+        /// </summary>
+        /// <returns>a new default XmlUrlResolver instance</returns>
+        private XmlUrlResolver CreateXmlUrlResolver() => new XmlUrlResolver
+        {
+            Credentials = CredentialCache.DefaultCredentials
+        };
+
+        /// <summary>
         /// Create XmlReaderSettings according to current XslTransformerSettings
         /// </summary>
         /// <returns>a new XmlReaderSettings instance</returns>
@@ -420,7 +429,7 @@ namespace XslTransformer.Core
             xmlReaderSettings.Async = true;
 
             // Set the reader settings object to use the default resolver.
-            xmlReaderSettings.XmlResolver = CreateXmlUrlResolver();
+            xmlReaderSettings.XmlResolver = mXmlUrlResolver;
 
             // set Properties according to current XslTransformerSettings
 
@@ -486,15 +495,6 @@ namespace XslTransformer.Core
         private XsltSettings CreateXsltSettings() => new XsltSettings(
             mSettings.GetValue<bool>(Setting.EnableDocumentFunction),
             mSettings.GetValue<bool>(Setting.EnableScript));
-
-        /// <summary>
-        /// Create a xml url resolver with default credentials
-        /// </summary>
-        /// <returns>a new default XmlUrlResolver instance</returns>
-        private XmlUrlResolver CreateXmlUrlResolver() => new XmlUrlResolver
-        {
-            Credentials = CredentialCache.DefaultCredentials
-        };
 
         #endregion
 
